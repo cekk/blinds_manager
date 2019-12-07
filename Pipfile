@@ -11,6 +11,7 @@ flask-mqtt = "*"
 flask-restful = "*"
 gunicorn = "*"
 flask-socketio = "*"
+gevent = "*"
 
 [requires]
 python_version = "3.7"

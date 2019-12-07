@@ -20,7 +20,7 @@ parser.add_argument("command", type=str, help="")
 
 @mqtt.on_connect()
 def handle_connect(client, userdata, flags, rc):
-    mqtt.subscribe("shellies/command")
+    # mqtt.subscribe("shellies/command")
     for blind in app.config.get("BLINDS", []):
         mqtt.subscribe("shellies/{id}/online".format(id=blind.get("id", "")))
         mqtt.subscribe("shellies/{id}/roller/0/pos".format(id=blind.get("id", "")))
@@ -100,4 +100,6 @@ api.add_resource(Update, "/update")
 api.add_resource(Action, "/roller/<string:id>/<string:action>")
 
 if __name__ == "__main__":
-    socketio.run(app, debug=False)
+    socketio.run(
+        app, debug=False, host="0.0.0.0", threaded=True,
+    )
