@@ -5,6 +5,7 @@ TODO
 ## Production mode
 
 ### gunicorn conf file
+
 Gunicorn configuration file isn't under version control.
 You need to create a `gunicorn_config.py` like this:
 
