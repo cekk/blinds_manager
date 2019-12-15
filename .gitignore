@@ -1,3 +1,5 @@
 instance
 .vscode
 gunicorn_config.py
+function.zip
+lambda_function/package
