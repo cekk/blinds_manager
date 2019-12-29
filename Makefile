@@ -1,6 +1,11 @@
 .PHONY: install
 install:
 	pipenv install
+	pipenv run buildout -N
+
+.PHONY: buildout
+buildout:
+	pipenv run buildout -N
 
 .PHONY: dev
 dev:

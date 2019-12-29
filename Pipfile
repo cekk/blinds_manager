@@ -6,12 +6,7 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-flask = "*"
-flask-mqtt = "*"
-flask-restful = "*"
-gunicorn = "*"
-flask-socketio = "*"
-gevent = "*"
+zc-buildout = "*"
 
 [requires]
 python_version = "3.7"

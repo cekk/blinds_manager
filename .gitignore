@@ -3,3 +3,10 @@ instance
 gunicorn_config.py
 function.zip
 lambda_function/package
+.installed.cfg
+__pycache__/
+bin/
+buildout.cfg
+eggs/
+parts/
+var/

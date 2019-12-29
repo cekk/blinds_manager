@@ -7,7 +7,9 @@ from utils import createSocketMessage
 import os
 import re
 
-app = Flask(__name__, instance_relative_config=True, static_folder="static/build")
+app = Flask(
+    __name__, instance_relative_config=True, static_folder="static/build"
+)
 app.config.from_pyfile("config.py")
 
 api = Api(app)
@@ -23,7 +25,9 @@ def handle_connect(client, userdata, flags, rc):
     # mqtt.subscribe("shellies/command")
     for blind in app.config.get("BLINDS", []):
         mqtt.subscribe("shellies/{id}/online".format(id=blind.get("id", "")))
-        mqtt.subscribe("shellies/{id}/roller/0/pos".format(id=blind.get("id", "")))
+        mqtt.subscribe(
+            "shellies/{id}/roller/0/pos".format(id=blind.get("id", ""))
+        )
         mqtt.subscribe("shellies/{id}/roller/0".format(id=blind.get("id", "")))
 
 
@@ -77,7 +81,12 @@ class Action(Resource):
 
     def get(self, id, action):
         if action not in ["close", "open", "stop"]:
-            return {"message": 'Valid actions are "close", "open", "stop" or "rc"'}, 400
+            return (
+                {
+                    "message": 'Valid actions are "close", "open", "stop" or "rc"'
+                },
+                400,
+            )
         if id == "all":
             for blind in app.config.get("BLINDS", []):
                 self.publish(id=blind.get("id", ""), action=action)
@@ -100,6 +109,4 @@ api.add_resource(Update, "/update")
 api.add_resource(Action, "/roller/<string:id>/<string:action>")
 
 if __name__ == "__main__":
-    socketio.run(
-        app, debug=False, host="0.0.0.0", threaded=True,
-    )
+    socketio.run(app, debug=True, host="0.0.0.0", threaded=False)
