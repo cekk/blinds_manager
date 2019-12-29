@@ -11,8 +11,11 @@ buildout:
 dev:
 	pipenv run python app.py
 
+dev-ssl:
+	pipenv run python app.py --cert /Users/cekk/letsencrypt/config/live/cekk.changeip.co/fullchain.pem --key /Users/cekk/letsencrypt/config/live/cekk.changeip.co/privkey.pem
+
 prod:
-	pipenv run gunicorn -c gunicorn_config.py wsgi:app
+	bin/gunicorn -c gunicorn_config.py wsgi:app
 
 deploy_lambda:
 	pipenv run pip install --target ./lambda_function/package -r lambda_function/requirements.txt

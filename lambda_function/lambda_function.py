@@ -3,10 +3,13 @@ from alexa.skills.smarthome import AlexaResponse
 
 import boto3
 import json
-import requests
+import jwt
 import os
+import requests
 
 api_endpoint = os.environ["API_ENDPOINT"]
+skill_id = os.environ["SKILL_ID"]
+token_secret = os.environ["TOKEN_SECRET"]
 
 
 def lambda_handler(request, context):
@@ -61,7 +64,7 @@ def lambda_handler(request, context):
 
     if namespace == "Alexa.Discovery":
         if name == "Discover":
-            res = requests.get("{}/blinds".format(api_endpoint))
+            res = call_api(endpoint="blinds")
 
             adr = AlexaResponse(namespace="Alexa.Discovery", name="Discover.Response")
             capability_alexa = adr.create_payload_endpoint_capability()
@@ -119,18 +122,17 @@ def lambda_handler(request, context):
         # Note: This sample always returns a success response for either a request to TurnOff or TurnOn
         device_id = request["directive"]["endpoint"]["endpointId"]
         action = "close" if name == "TurnOff" else "open"
-        print(">>>>> NAME: {}".format(name))
-        print(request)
-        res = requests.get(
-            "{api_endpoint}/roller/{device_id}/{action}".format(
-                api_endpoint=api_endpoint, device_id=device_id, action=action
+        call_api(
+            endpoint="roller/{device_id}/{action}".format(
+                device_id=device_id, action=action
             )
         )
         correlation_token = request["directive"]["header"]["correlationToken"]
 
         apcr = AlexaResponse(correlation_token=correlation_token)
+        state_value = "OFF" if name == "TurnOff" else "ON"
         apcr.add_context_property(
-            namespace="Alexa.ToggleController", name="toggleState", value="ciccio",
+            namespace="Alexa.ToggleController", name="toggleState", value=state_value,
         )
         return send_response(apcr.get())
 
@@ -140,4 +142,15 @@ def send_response(response):
     print("lambda_handler response -----")
     print(json.dumps(response))
     return response
+
+
+def call_api(endpoint):
+    auth_token = jwt.encode({"identity": skill_id}, token_secret, algorithm="HS256")
+    hed = {"Authorization": b"Bearer " + auth_token}
+    url = "{api_endpoint}/{endpoint}".format(
+        api_endpoint=api_endpoint, endpoint=endpoint
+    )
+    print("lambda_handler CALL API -----")
+    print(url)
+    requests.get(url, headers=hed)
 
