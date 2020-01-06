@@ -9,10 +9,7 @@ buildout:
 
 .PHONY: dev
 dev:
-	pipenv run python app.py
-
-dev-ssl:
-	pipenv run python app.py --cert /Users/cekk/letsencrypt/config/live/cekk.changeip.co/fullchain.pem --key /Users/cekk/letsencrypt/config/live/cekk.changeip.co/privkey.pem
+	FLASK_APP=dev.py bin/flask run -p 8000
 
 prod:
 	bin/gunicorn -c gunicorn_config.py wsgi:app

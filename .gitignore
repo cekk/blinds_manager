@@ -10,3 +10,6 @@ buildout.cfg
 eggs/
 parts/
 var/
+develop-eggs/
+src/
+.mr.developer.cfg

@@ -1,4 +1,13 @@
+# -*- coding: utf-8 -*-
+from flask_mqtt import Mqtt
+from flask_socketio import SocketIO
+from flask import current_app as app
+
 import re
+
+
+socketio = SocketIO()
+mqtt = Mqtt()
 
 
 def createSocketMessage(message):

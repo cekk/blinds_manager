@@ -5,6 +5,7 @@ import { Heading, Box } from "@chakra-ui/core";
 import BlindsList from "./BlindsList";
 import io from "socket.io-client";
 import axios from "axios";
+import isEqual from "lodash.isequal";
 
 class App extends Component {
   constructor() {
@@ -18,6 +19,11 @@ class App extends Component {
 
   updateBlindInfos = data => {
     const { blinds } = this.state;
+    const blind = blinds.filter(device => device.id === data.id)[0];
+    if (isEqual(blind, { ...blind, ...data })) {
+      // no changes
+      return;
+    }
     const updatedValues = blinds.map(blind => {
       if (blind.id !== data.id) {
         return blind;
