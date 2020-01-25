@@ -104,23 +104,27 @@ class AlexaResponse:
             "interface": kwargs.get("interface", "Alexa"),
             "version": kwargs.get("version", "3"),
         }
-        instance = kwargs.get("instance", None)
-        if instance:
-            capability["instance"] = instance
-        supported = kwargs.get("supported", None)
-        if supported:
-            capability["properties"] = {}
-            capability["properties"]["supported"] = supported
-            capability["properties"]["proactivelyReported"] = kwargs.get(
-                "proactively_reported", False
-            )
-            capability["properties"]["retrievable"] = kwargs.get("retrievable", False)
-        semantics = kwargs.get("semantics", None)
-        if semantics:
-            capability["semantics"] = semantics
-        capability_resources = kwargs.get("capability_resources", None)
-        if capability_resources:
-            capability["capabilityResources"] = capability_resources
+        # instance = kwargs.get("instance", None)
+        # if instance:
+        #     capability["instance"] = instance
+        # supported = kwargs.get("supported", None)
+        # if supported:
+        #     capability["properties"] = {}
+        #     capability["properties"]["supported"] = supported
+        #     capability["properties"]["proactivelyReported"] = kwargs.get(
+        #         "proactively_reported", False
+        #     )
+        #     capability["properties"]["retrievable"] = kwargs.get("retrievable", False)
+        # semantics = kwargs.get("semantics", None)
+        # if semantics:
+        #     capability["semantics"] = semantics
+        # configuration = kwargs.get("configuration", None)
+        # if configuration:
+        #     capability["configuration"] = configuration
+        # capability_resources = kwargs.get("capability_resources", None)
+        # if capability_resources:
+        #     capability["capabilityResources"] = capability_resources
+        capability.update(kwargs)
         return capability
 
     def get(self, remove_empty=True):

@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 from alexa.skills.smarthome import AlexaResponse
+from capabilities_settings import MODE_CAPABILITY
+from capabilities_settings import RANGE_CAPABILITY
+from capabilities_settings import TOGGLE_CAPABILITY
 
 import boto3
 import json
@@ -68,73 +71,64 @@ def lambda_handler(request, context):
 
             adr = AlexaResponse(namespace="Alexa.Discovery", name="Discover.Response")
             capability_alexa = adr.create_payload_endpoint_capability()
-            capability_alexa_togglecontroller = adr.create_payload_endpoint_capability(
-                interface="Alexa.ToggleController",
-                supported=[{"name": "toggleState"}],
-                instance="Blind.BlindState",
-                capability_resources={
-                    "friendlyNames": [
-                        {
-                            "@type": "text",
-                            "value": {"text": "tapparella", "locale": "it-IT"},
-                        }
-                    ]
-                },
-                semantics={
-                    "actionMappings": [
-                        {
-                            "@type": "ActionsToDirective",
-                            "actions": ["Alexa.Actions.Close"],
-                            "directive": {"name": "TurnOff", "payload": {}},
-                        },
-                        {
-                            "@type": "ActionsToDirective",
-                            "actions": ["Alexa.Actions.Open"],
-                            "directive": {"name": "TurnOn", "payload": {}},
-                        },
-                    ],
-                    "stateMappings": [
-                        {
-                            "@type": "StatesToValue",
-                            "states": ["Alexa.States.Closed"],
-                            "value": "OFF",
-                        },
-                        {
-                            "@type": "StatesToValue",
-                            "states": ["Alexa.States.Open"],
-                            "value": "ON",
-                        },
-                    ],
-                },
+            togglecontroller = adr.create_payload_endpoint_capability(
+                **TOGGLE_CAPABILITY
             )
+            rangecontroller = adr.create_payload_endpoint_capability(**RANGE_CAPABILITY)
+            # capability_alexa_modecontroller = adr.create_payload_endpoint_capability(
+            #     **MODE_CAPABILITY
+            # )
 
             for blind in res.json():
                 adr.add_payload_endpoint(
                     friendly_name=blind.get("name"),
                     endpoint_id=blind.get("id"),
                     description="Remote controlled blind",
-                    capabilities=[capability_alexa, capability_alexa_togglecontroller],
+                    capabilities=[capability_alexa, rangecontroller],
                     display_categories=["INTERIOR_BLIND"],
                 )
             return send_response(adr.get())
 
-    if namespace == "Alexa.ToggleController":
+    # if namespace == "Alexa.ToggleController":
+    #     # Note: This sample always returns a success response for either a request to TurnOff or TurnOn
+    #     device_id = request["directive"]["endpoint"]["endpointId"]
+    #     action = "close" if name == "TurnOff" else "open"
+    #     call_api(
+    #         endpoint="roller/{device_id}/{action}".format(
+    #             device_id=device_id, action=action
+    #         )
+    #     )
+    #     correlation_token = request["directive"]["header"]["correlationToken"]
+
+    #     apcr = AlexaResponse(correlation_token=correlation_token)
+    #     state_value = "OFF" if name == "TurnOff" else "ON"
+    #     apcr.add_context_property(
+    #         namespace="Alexa.ToggleController", name="toggleState", value=state_value,
+    #     )
+    #     return send_response(apcr.get())
+
+    if namespace == "Alexa.RangeController":
         # Note: This sample always returns a success response for either a request to TurnOff or TurnOn
         device_id = request["directive"]["endpoint"]["endpointId"]
-        action = "close" if name == "TurnOff" else "open"
-        call_api(
-            endpoint="roller/{device_id}/{action}".format(
-                device_id=device_id, action=action
-            )
+        if name == 'AdjustRangeValue':
+            value = request["directive"]["payload"]["rangeValueDelta"]
+        else:
+            value = request["directive"]["payload"]["rangeValue"]
+        res = call_api(
+            endpoint="blind/position",
+            method="POST",
+            data={"id": device_id, "value": int(value), "type": name},
         )
+        print("-- RESPONSE --")
+        print(res.json())
         correlation_token = request["directive"]["header"]["correlationToken"]
 
-        apcr = AlexaResponse(correlation_token=correlation_token)
-        state_value = "OFF" if name == "TurnOff" else "ON"
-        apcr.add_context_property(
-            namespace="Alexa.ToggleController", name="toggleState", value=state_value,
-        )
-        return send_response(apcr.get())
+        # apcr = AlexaResponse(correlation_token=correlation_token)
+        # state_value = "OFF" if name == "TurnOff" else "ON"
+        # apcr.add_context_property(
+        #     namespace="Alexa.RangeController", name="toggleState", value=state_value,
+        # )
+        # return send_response(apcr.get())
 
 
 def send_response(response):
@@ -144,13 +138,18 @@ def send_response(response):
     return response
 
 
-def call_api(endpoint):
+def call_api(endpoint, method="GET", data={}):
     auth_token = jwt.encode({"identity": skill_id}, token_secret, algorithm="HS256")
     hed = {"Authorization": b"Bearer " + auth_token}
     url = "{api_endpoint}/{endpoint}".format(
         api_endpoint=api_endpoint, endpoint=endpoint
     )
     print("lambda_handler CALL API -----")
-    print(url)
-    requests.get(url, headers=hed)
+    print("URL: {url}".format(url=url))
+    if data:
+        print("DATA: {data}".format(data=data))
+    if method == "GET":
+        return requests.get(url, headers=hed)
+    else:
+        return requests.post(url, headers=hed, data=data)
 
