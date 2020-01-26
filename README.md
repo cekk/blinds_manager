@@ -72,3 +72,28 @@ If you need to run the server with ssl cert, add these rows:
 certfile = "/path/to/ssl/certfile.pem"
 keyfile = "path/to/ssl/privkey.pem"
 ```
+
+## certbot
+
+install certbot:
+
+    > apt-get install certbot
+
+or on mac:
+
+    > brew install certbot
+
+Make sure that you open ports on your router for letsencrypt connections:
+
+- local port: 4080 - public port: 80
+- local port: 4443 - public port: 443
+
+Then you can generate a new certificate and chain file:
+
+    > certbot certonly --standalone -d your_domain --http-01-port 4080 --tls-sni-01-port 4443
+
+To renew cert, run:
+
+    > certbot renew
+
+or re-generate certificates

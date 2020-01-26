@@ -12,7 +12,7 @@ dev:
 	FLASK_APP=dev.py bin/flask run -p 8000
 
 prod:
-	bin/gunicorn -c gunicorn_config.py wsgi:app
+	bin/gunicorn -c gunicorn_config.py production:app
 
 deploy_lambda:
 	pipenv run pip install --target ./lambda_function/package -r lambda_function/requirements.txt
