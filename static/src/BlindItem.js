@@ -5,10 +5,12 @@ import {
   Text,
   Badge,
   IconButton,
+  Icon,
   Slider,
   SliderTrack,
   SliderFilledTrack,
-  SliderThumb
+  SliderThumb,
+  Grid
 } from "@chakra-ui/core";
 
 import {
@@ -27,12 +29,10 @@ function PositionSelector({ position, id }) {
     return "";
   }
   return (
-    <Slider defaultValue={position} onChange={doAction}>
+    <Slider defaultValue={position} onChange={doAction} size="md">
       <SliderTrack bg="red.100" />
       <SliderFilledTrack bg="tomato" />
-      <SliderThumb size={6}>
-        <Box color="tomato" as={FaArrowAltCircleDown} />
-      </SliderThumb>
+      <SliderThumb size={6}></SliderThumb>
     </Slider>
   );
 }
@@ -44,28 +44,37 @@ function BlindItem(data) {
     axios.get(`/roller/${id}/${action}`);
   };
   return (
-    <Box height="200px" bg="gray.200" textAlign="center">
-      <Heading>{name}</Heading>
-      <Box>
-        <Badge variantColor={online ? "green" : "red"}>
-          {online ? "online" : "offline"}
-        </Badge>
-      </Box>
-
-      <Box>
+    <Box height="200px" textAlign="center" bg="white" m={5}>
+      <Grid templateColumns="80% 15%" columnGap={5}>
+        <Box textAlign="left" pl={3}>
+          <Heading>{name}</Heading>
+        </Box>
+        <Box pt="6px">
+          <Icon
+            name={online ? "check-circle" : "warning"}
+            size="20px"
+            color={online ? "green.400" : "red.500"}
+          />
+        </Box>
+      </Grid>
+      <Box textAlign="left" pl={3}>
         <Text fontSize="sm" fontWeight="bold">
-          Current action: {action}
+          Current action: <Badge variant="outline">{action}</Badge>
         </Text>
       </Box>
-      <Box>
-        <Text fontSize="sm" fontWeight="bold">
-          Current position: {position ? `${position}%` : "..."}
-        </Text>
-        <PositionSelector id={id} position={position} />
+      <Box mt={5}>
+        <Grid templateColumns="80% 15%" columnGap={5} pl={10} pr={10}>
+          <Box>
+            <PositionSelector id={id} position={position} />
+          </Box>
+          <Box>
+            <Badge variant="outline">{position ? `${position}%` : "..."}</Badge>
+          </Box>
+        </Grid>
       </Box>
       <IconButton
         variant="outline"
-        variantColor="teal"
+        variantColor="black"
         aria-label="Open"
         fontSize="20px"
         disabled={action === "open" || !online}
@@ -77,7 +86,7 @@ function BlindItem(data) {
       />
       <IconButton
         variant="outline"
-        variantColor="teal"
+        variantColor="black"
         aria-label="Stop"
         fontSize="20px"
         icon={FaPauseCircle}
@@ -89,7 +98,7 @@ function BlindItem(data) {
       />
       <IconButton
         variant="outline"
-        variantColor="teal"
+        variantColor="black"
         aria-label="Close"
         fontSize="20px"
         icon={FaArrowAltCircleDown}
