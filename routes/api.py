@@ -12,7 +12,9 @@ from functools import wraps
 from utils import mqtt
 
 import requests
+import logging
 
+logger = logging.getLogger(__name__)
 
 api_bp = Blueprint("api", __name__)
 api = Api(api_bp)
@@ -46,10 +48,14 @@ class ProtectedResource(Resource):
     method_decorators = [verify_access]
 
     def get_roller_status(self, blind):
-        response = requests.get("http://{ip}/roller/0".format(ip=blind.get("ip")))
+        try:
+            response = requests.get("http://{ip}/roller/0".format(ip=blind.get("ip")))
+        except Exception as e:
+            logger.exception(e)
+            return {}
         if not response.ok:
             app.logger.error(
-                'Unable to retrieve status of Blind "{id}" ({ip}): {reason}'.format(
+                'Unable to retrieve status of Blind "{}" ({}): {}'.format(
                     blind.get("id"), blind.get("ip"), response.reason
                 )
             )
@@ -62,7 +68,6 @@ class Blinds(ProtectedResource):
         res = []
         for blind in app.config.get("BLINDS", []):
             blind_infos = blind.copy()
-            response = requests.get("http://{ip}/roller/0".format(ip=blind.get("ip")))
             roller_status = self.get_roller_status(blind=blind)
             if roller_status:
                 blind_infos["action"] = roller_status.get("state")
